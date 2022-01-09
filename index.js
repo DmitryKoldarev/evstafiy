@@ -1,11 +1,11 @@
 const readlineSync = require('readline-sync');
-const evstafiyMaxHealth = readlineSync.question('Выберите сложность игры - здоровье боевого мага Евстафия (от 6 до 10): ');
+const evstafiyMaxHealth = readlineSync.question('Выберите сложность игры - здоровье боевого мага Евстафия (от 5 до 10): ');
 const winer = {};
 
-if (evstafiyMaxHealth < 6 || evstafiyMaxHealth > 10){
-    console.log('Евстафий с таким здоровьем сам выглядит монстром! Начальное здоровье должно быть от 6 до 10.');
+if (evstafiyMaxHealth < 5 || evstafiyMaxHealth > 10) {
+    console.log('Евстафий с таким здоровьем сам выглядит монстром! Начальное здоровье должно быть от 5 до 10.');
     return false;
-    }
+}
 
 //Монстр описывается таким объектом:
 const monster = {
@@ -81,18 +81,16 @@ const wizard = {
     ]
 }
 
-var monsterMovement;
-function chooseMonsterMovement () {
-    monsterMovement = readlineSync.question('Выберите удар Лютого (введите число от 1 до 3): ');
-    if (monsterMovement < 1 || monsterMovement > 3){
-        console.log('Монстр не располагает такими возможностями. Выберите другой удар (от 1 до 3): ');
-        chooseMonsterMovement (monsterMovement);
-        monsterMovement -= 1;
-        return monster.moves[monsterMovement];
-    }
-    monsterMovement -= 1;
-    return monster.moves[monsterMovement]; 
+function round(value, precision) {
+    var multiplier = Math.pow(10, precision || 0);
+    return Math.round(value * multiplier) / multiplier;
 }
+
+var monsterMovement;
+  function chooseMonsterMovement(max) {
+    return monsterMovement = Math.floor(Math.random() * max);
+  }
+
 
 var wizardMovement;
 function chooseWizardMovement () {
@@ -107,22 +105,27 @@ function chooseWizardMovement () {
     return wizard.moves[wizardMovement]; 
 }
 
-chooseMonsterMovement ();
-console.log('Лютый нанёс ' + monster.moves[monsterMovement].name);
 
-chooseWizardMovement ();
-console.log('Евстафий нанёс ' + wizard.moves[wizardMovement].name);
+while ((Number(monster.maxHealth)) >= 0) {
+    chooseMonsterMovement(monster.moves.length);
+    console.log('Лютый нанёс ' + monster.moves[monsterMovement].name);
 
-monster.maxHealth -= ((wizard.moves[wizardMovement].physicalDmg - wizard.moves[wizardMovement].physicalDmg * (monster.moves[monsterMovement ].physicArmorPercents / 100)) + (wizard.moves[wizardMovement].magicDmg - wizard.moves[wizardMovement].magicDmg * (monster.moves[monsterMovement ].magicArmorPercents / 100)));
-wizard.maxHealth -= ((monster.moves[monsterMovement].physicalDmg - monster.moves[monsterMovement].physicalDmg * (wizard.moves[wizardMovement ].physicArmorPercents / 100)) + (monster.moves[monsterMovement].magicDmg - monster.moves[monsterMovement].magicDmg * (wizard.moves[wizardMovement ].magicArmorPercents / 100)));
-console.log('Текущее здоровье мага Евстафия - ' + wizard.maxHealth);
-console.log('Текущее здоровье монстра Лютого - ' + monster.maxHealth);
+    chooseWizardMovement ();
+    console.log('Евстафий нанёс ' + wizard.moves[wizardMovement].name);
 
-if (Number(monster.maxHealth) > Number(wizard.maxHealth)){
-    winer.name = monster.name;
+    monster.maxHealth -= ((wizard.moves[wizardMovement].physicalDmg - wizard.moves[wizardMovement].physicalDmg * (monster.moves[monsterMovement ].physicArmorPercents / 100)) + (wizard.moves[wizardMovement].magicDmg - wizard.moves[wizardMovement].magicDmg * (monster.moves[monsterMovement ].magicArmorPercents / 100)));
+    wizard.maxHealth -= ((monster.moves[monsterMovement].physicalDmg - monster.moves[monsterMovement].physicalDmg * (wizard.moves[wizardMovement ].physicArmorPercents / 100)) + (monster.moves[monsterMovement].magicDmg - monster.moves[monsterMovement].magicDmg * (wizard.moves[wizardMovement ].magicArmorPercents / 100)));
+    console.log('Текущее здоровье мага Евстафия: ' + round(wizard.maxHealth,1));
+    console.log('Текущее здоровье монстра Лютого: ' + round(monster.maxHealth,1));
+    if ((Number(monster.maxHealth)) <= 0) {
+        break;
+    }
+    if ((Number(wizard.maxHealth)) <= 0) {
+        break;
+    }
 }
-else {
-    winer.name = wizard.name;
-}
+
+Number(monster.maxHealth) > Number(wizard.maxHealth) ? winer.name = monster.name : winer.name = wizard.name;
+
 
 console.log('На этот раз победил ' + winer.name);
