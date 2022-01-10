@@ -81,6 +81,28 @@ const wizard = {
     ]
 }
 
+//дополнение полей во всех объектах moves для контроля cooldown
+for (let j = 0; j < monster.moves.length; j += 1) {
+    monster.moves[j].cooldownCounts = 0;
+}
+
+for (j = 0; j < wizard.moves.length; j += 1) {
+    wizard.moves[j].cooldownCounts = 0;
+}  
+
+function cooldownDown () {
+    for (let j = 0; j < monster.moves.length; j += 1) {
+        if (monster.moves[j].cooldownCounts > 0) {
+            monster.moves[j].cooldownCounts -= 1;
+        }
+    }     
+    for (let j = 0; j < wizard.moves.length; j += 1) {
+        if (wizard.moves[j].cooldownCounts > 0) {
+            wizard.moves[j].cooldownCounts -= 1;
+        } 
+    }
+}
+
 function round(value, precision) {
     var multiplier = Math.pow(10, precision || 0);
     return Math.round(value * multiplier) / multiplier;
@@ -89,6 +111,7 @@ function round(value, precision) {
 var monsterMovement;
   function chooseMonsterMovement(max) {
     return monsterMovement = Math.floor(Math.random() * max);
+    monster.moves
   }
 
 
@@ -106,17 +129,25 @@ function chooseWizardMovement () {
 }
 
 
-while (((Number(monster.maxHealth)) > 0) && (((Number(wizard.maxHealth)) > 0))) {
+while (+monster.maxHealth > 0 && +wizard.maxHealth > 0) {
     chooseMonsterMovement(monster.moves.length);
-    console.log('Лютый нанёс ' + monster.moves[monsterMovement].name);
+    monster.moves[monsterMovement].cooldownCounts = monster.moves[monsterMovement].cooldown;
+    console.log('Лютый нанёс ' + monster.moves[monsterMovement].name + '. Удар заблокирован на ' + monster.moves[monsterMovement].cooldownCounts + ' хода (ходов).');
 
     chooseWizardMovement ();
-    console.log('Евстафий нанёс ' + wizard.moves[wizardMovement].name);
+    wizard.moves[wizardMovement].cooldownCounts = wizard.moves[wizardMovement].cooldown;
+    console.log('Евстафий нанёс ' + wizard.moves[wizardMovement].name + '. Удар заблокирован на ' + wizard.moves[wizardMovement].cooldownCounts + ' хода (ходов).');
 
     monster.maxHealth -= ((wizard.moves[wizardMovement].physicalDmg - wizard.moves[wizardMovement].physicalDmg * (monster.moves[monsterMovement ].physicArmorPercents / 100)) + (wizard.moves[wizardMovement].magicDmg - wizard.moves[wizardMovement].magicDmg * (monster.moves[monsterMovement ].magicArmorPercents / 100)));
     wizard.maxHealth -= ((monster.moves[monsterMovement].physicalDmg - monster.moves[monsterMovement].physicalDmg * (wizard.moves[wizardMovement ].physicArmorPercents / 100)) + (monster.moves[monsterMovement].magicDmg - monster.moves[monsterMovement].magicDmg * (wizard.moves[wizardMovement ].magicArmorPercents / 100)));
     console.log('Текущее здоровье мага Евстафия: ' + round(wizard.maxHealth,1));
     console.log('Текущее здоровье монстра Лютого: ' + round(monster.maxHealth,1));
+    
+    //уменьшение счётчика cooldown
+    cooldownDown ();
+    console.log(wizard.moves);
+    console.log(monster.moves);
+    
 }
 
 winner.name = Number(monster.maxHealth) > Number(wizard.maxHealth) ? monster.name : wizard.name;
