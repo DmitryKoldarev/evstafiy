@@ -118,7 +118,7 @@ function chooseMonsterMovement(max) {
 
         currentMovement = Math.floor(Math.random() * max);
         if (monster.moves[currentMovement].cooldownCounts >0) {
-            console.log ('Лютый не может сделать это действие ещё ' + monster.moves[currentMovement].cooldownCounts + ' шага (шагов)');
+            console.log('Лютый попытался, но не сможет сделать действие "' + monster.moves[currentMovement].name + '" ещё ' + monster.moves[currentMovement].cooldownCounts + ' шага (шагов)');
         }
         else {
             choosedMovementIndex = currentMovement;
@@ -132,7 +132,7 @@ function chooseWizardMovement() {
     var choosedMovementIndex = null;
     var currentMovement;
     while (choosedMovementIndex == null) {
-        currentMovement = readlineSync.question('Выберите удар Евстафия (введите число от 1 до 4): ');
+        currentMovement = readlineSync.question('Выберите удар Евстафия (введите число от 1 до ' + (+monster.moves.length+1) + '): ');
 
         if (currentMovement < 1 || currentMovement > 4){
             console.log('Евстафию предстоит научиться таким ударам.');
@@ -140,7 +140,7 @@ function chooseWizardMovement() {
         }
             else {
                 if (wizard.moves[currentMovement-1].cooldownCounts >0) {
-                    console.log ('Евстафий не может сделать это действие ещё ' + wizard.moves[currentMovement-1].cooldownCounts + ' шага (шагов)');
+                    console.log('Евстафий не может сделать действие "' + wizard.moves[currentMovement-1].name + '" ещё ' + wizard.moves[currentMovement-1].cooldownCounts + ' шага (шагов)');
                 }
                 else {
                     choosedMovementIndex = currentMovement - 1;
@@ -160,12 +160,12 @@ while (+monster.maxHealth > 0 && +wizard.maxHealth > 0) {
     monsterMovement = chooseMonsterMovement(monster.moves.length);
 
     monsterMovement.cooldownCounts = monsterMovement.cooldown;
-    console.log('Лютый нанёс ' + monsterMovement.name + '. Удар заблокирован на ' + monsterMovement.cooldownCounts + ' хода (ходов).');
+    console.log('Лютый нанёс "' + monsterMovement.name + '". Удар заблокирован на ' + monsterMovement.cooldownCounts + ' хода (ходов).');
 
     wizardMovement = chooseWizardMovement();
    
     wizardMovement.cooldownCounts = wizardMovement.cooldown;
-    console.log('Евстафий нанёс ' + wizardMovement.name + '. Удар заблокирован на ' + wizardMovement.cooldownCounts + ' хода (ходов).');
+    console.log('Евстафий нанёс "' + wizardMovement.name + '". Удар заблокирован на ' + wizardMovement.cooldownCounts + ' хода (ходов).');
 
     monster.maxHealth -= ((wizardMovement.physicalDmg - wizardMovement.physicalDmg * (monsterMovement.physicArmorPercents / 100)) + (wizardMovement.magicDmg - wizardMovement.magicDmg * (monsterMovement.magicArmorPercents / 100)));
     wizard.maxHealth -= ((monsterMovement.physicalDmg - monsterMovement.physicalDmg * (wizardMovement.physicArmorPercents / 100)) + (monsterMovement.magicDmg - monsterMovement.magicDmg * (wizardMovement.magicArmorPercents / 100)));
