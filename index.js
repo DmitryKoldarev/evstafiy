@@ -1,6 +1,8 @@
 const readlineSync = require('readline-sync');
 const evstafiyMaxHealth = readlineSync.question('Выберите сложность игры - здоровье боевого мага Евстафия (от 5 до 10): ');
 const winner = {};
+let monsterMovement;
+let wizardMovement;
 
 if (evstafiyMaxHealth < 5 || evstafiyMaxHealth > 10) {
     console.log('Евстафий с таким здоровьем сам выглядит монстром! Начальное здоровье должно быть от 5 до 10.');
@@ -90,7 +92,7 @@ for (j = 0; j < wizard.moves.length; j += 1) {
     wizard.moves[j].cooldownCounts = 0;
 }  
 
-function cooldownDown () {
+function cooldownDown() {
     for (let j = 0; j < monster.moves.length; j += 1) {
         if (monster.moves[j].cooldownCounts > 0) {
             monster.moves[j].cooldownCounts -= 1;
@@ -108,45 +110,67 @@ function round(value, precision) {
     return Math.round(value * multiplier) / multiplier;
 }
 
-var monsterMovement;
-  function chooseMonsterMovement(max) {
-    return monsterMovement = Math.floor(Math.random() * max);
-    monster.moves
-  }
 
+function chooseMonsterMovement(max) {
+    var choosedMovementIndex = null;
+    var currentMovement;
+    while (choosedMovementIndex == null) {
 
-var wizardMovement;
-function chooseWizardMovement () {
-    wizardMovement = readlineSync.question('Выберите удар Евстафия (введите число от 1 до 4): ');
-    if (wizardMovement < 1 || wizardMovement > 4){
-        console.log('Евстафию предстоит научиться таким ударам, а пока что выберите другой (от 1 до 4): ');
-        chooseWizardMovement ();
-        wizardMovement -= 1;
-        return wizard.moves[wizardMovement];
+        currentMovement = Math.floor(Math.random() * max);
+        if (monster.moves[currentMovement].cooldownCounts >0) {
+            console.log ('Лютый не может сделать это действие ещё ' + monster.moves[currentMovement].cooldownCounts + ' шага (шагов)');
+        }
+        else {
+            choosedMovementIndex = currentMovement;
+        }
     }
-    wizardMovement -= 1;
-    return wizard.moves[wizardMovement]; 
+    return monster.moves[choosedMovementIndex];
 }
 
 
+function chooseWizardMovement() {
+    var choosedMovementIndex = null;
+    var currentMovement;
+    while (choosedMovementIndex == null) {
+        currentMovement = readlineSync.question('Выберите удар Евстафия (введите число от 1 до 4): ');
+
+        if (currentMovement < 1 || currentMovement > 4){
+            console.log('Евстафию предстоит научиться таким ударам.');
+            continue;
+        }
+            else {
+                if (wizard.moves[currentMovement-1].cooldownCounts >0) {
+                    console.log ('Евстафий не может сделать это действие ещё ' + wizard.moves[currentMovement-1].cooldownCounts + ' шага (шагов)');
+                }
+                else {
+                    choosedMovementIndex = currentMovement - 1;
+                }
+                
+            }
+    }
+    return wizard.moves[choosedMovementIndex]; 
+}
+
+
+
 while (+monster.maxHealth > 0 && +wizard.maxHealth > 0) {
-    chooseMonsterMovement(monster.moves.length);
-    monster.moves[monsterMovement].cooldownCounts = monster.moves[monsterMovement].cooldown;
-    console.log('Лютый нанёс ' + monster.moves[monsterMovement].name + '. Удар заблокирован на ' + monster.moves[monsterMovement].cooldownCounts + ' хода (ходов).');
-
-    chooseWizardMovement ();
-    wizard.moves[wizardMovement].cooldownCounts = wizard.moves[wizardMovement].cooldown;
-    console.log('Евстафий нанёс ' + wizard.moves[wizardMovement].name + '. Удар заблокирован на ' + wizard.moves[wizardMovement].cooldownCounts + ' хода (ходов).');
-
-    monster.maxHealth -= ((wizard.moves[wizardMovement].physicalDmg - wizard.moves[wizardMovement].physicalDmg * (monster.moves[monsterMovement ].physicArmorPercents / 100)) + (wizard.moves[wizardMovement].magicDmg - wizard.moves[wizardMovement].magicDmg * (monster.moves[monsterMovement ].magicArmorPercents / 100)));
-    wizard.maxHealth -= ((monster.moves[monsterMovement].physicalDmg - monster.moves[monsterMovement].physicalDmg * (wizard.moves[wizardMovement ].physicArmorPercents / 100)) + (monster.moves[monsterMovement].magicDmg - monster.moves[monsterMovement].magicDmg * (wizard.moves[wizardMovement ].magicArmorPercents / 100)));
-    console.log('Текущее здоровье мага Евстафия: ' + round(wizard.maxHealth,1));
-    console.log('Текущее здоровье монстра Лютого: ' + round(monster.maxHealth,1));
     
     //уменьшение счётчика cooldown
-    cooldownDown ();
-    console.log(wizard.moves);
-    console.log(monster.moves);
+    cooldownDown();
+    monsterMovement = chooseMonsterMovement(monster.moves.length);
+
+    monsterMovement.cooldownCounts = monsterMovement.cooldown;
+    console.log('Лютый нанёс ' + monsterMovement.name + '. Удар заблокирован на ' + monsterMovement.cooldownCounts + ' хода (ходов).');
+
+    wizardMovement = chooseWizardMovement();
+   
+    wizardMovement.cooldownCounts = wizardMovement.cooldown;
+    console.log('Евстафий нанёс ' + wizardMovement.name + '. Удар заблокирован на ' + wizardMovement.cooldownCounts + ' хода (ходов).');
+
+    monster.maxHealth -= ((wizardMovement.physicalDmg - wizardMovement.physicalDmg * (monsterMovement.physicArmorPercents / 100)) + (wizardMovement.magicDmg - wizardMovement.magicDmg * (monsterMovement.magicArmorPercents / 100)));
+    wizard.maxHealth -= ((monsterMovement.physicalDmg - monsterMovement.physicalDmg * (wizardMovement.physicArmorPercents / 100)) + (monsterMovement.magicDmg - monsterMovement.magicDmg * (wizardMovement.magicArmorPercents / 100)));
+    console.log('Текущее здоровье мага Евстафия: ' + round(wizard.maxHealth,1));
+    console.log('Текущее здоровье монстра Лютого: ' + round(monster.maxHealth,1));
     
 }
 
