@@ -1,6 +1,6 @@
 const readlineSync = require('readline-sync');
 const evstafiyMaxHealth = readlineSync.question('Выберите сложность игры - здоровье боевого мага Евстафия (от 5 до 10): ');
-const winer = {};
+const winner = {};
 
 if (evstafiyMaxHealth < 5 || evstafiyMaxHealth > 10) {
     console.log('Евстафий с таким здоровьем сам выглядит монстром! Начальное здоровье должно быть от 5 до 10.');
@@ -106,7 +106,7 @@ function chooseWizardMovement () {
 }
 
 
-while ((Number(monster.maxHealth)) >= 0) {
+while (((Number(monster.maxHealth)) > 0) && (((Number(wizard.maxHealth)) > 0))) {
     chooseMonsterMovement(monster.moves.length);
     console.log('Лютый нанёс ' + monster.moves[monsterMovement].name);
 
@@ -117,15 +117,8 @@ while ((Number(monster.maxHealth)) >= 0) {
     wizard.maxHealth -= ((monster.moves[monsterMovement].physicalDmg - monster.moves[monsterMovement].physicalDmg * (wizard.moves[wizardMovement ].physicArmorPercents / 100)) + (monster.moves[monsterMovement].magicDmg - monster.moves[monsterMovement].magicDmg * (wizard.moves[wizardMovement ].magicArmorPercents / 100)));
     console.log('Текущее здоровье мага Евстафия: ' + round(wizard.maxHealth,1));
     console.log('Текущее здоровье монстра Лютого: ' + round(monster.maxHealth,1));
-    if ((Number(monster.maxHealth)) <= 0) {
-        break;
-    }
-    if ((Number(wizard.maxHealth)) <= 0) {
-        break;
-    }
 }
 
-Number(monster.maxHealth) > Number(wizard.maxHealth) ? winer.name = monster.name : winer.name = wizard.name;
+winner.name = Number(monster.maxHealth) > Number(wizard.maxHealth) ? monster.name : wizard.name;
 
-
-console.log('На этот раз победил ' + winer.name);
+console.log('На этот раз победил ' + winner.name);
